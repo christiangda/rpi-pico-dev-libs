@@ -215,7 +215,7 @@ void mpu6050_init(){
 
     // check id
     uint8_t id;
-    id = mpu6050_get_id();
+    id = mpu6050_get_device_id();
     if(id != MPU6050_ADDRESS ){
         while (1)
         {
@@ -255,7 +255,7 @@ void mpu6050_reset_temperature_path(){
  *
  * @return uint8_t
  */
-uint8_t mpu6050_get_id(){
+uint8_t mpu6050_get_device_id(){
     uint8_t value;
     i2c_read_reg(WHO_AM_I, &value);
     return value;

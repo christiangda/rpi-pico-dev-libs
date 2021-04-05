@@ -95,13 +95,8 @@ typedef enum {
 void mpu6050_init();
 void mpu6050_reset();
 
-// Register 104 – Signal Path Reset SIGNAL_PATH_RESET
-void mpu6050_reset_accelerometer_path();
-void mpu6050_reset_gyroscope_path();
-void mpu6050_reset_temperature_path();
-
 // getters
-uint8_t mpu6050_get_id();
+uint8_t mpu6050_get_device_id();
 
 // acceleration
 void mpu6050_get_acceleration(float*, float*, float*);
@@ -120,6 +115,11 @@ float mpu6050_get_temperature();
 
 // setters
 void mpu6050_set_clock(uint8_t);
+
+// Register 104 – Signal Path Reset SIGNAL_PATH_RESET
+void mpu6050_reset_accelerometer_path();
+void mpu6050_reset_gyroscope_path();
+void mpu6050_reset_temperature_path();
 
 // Support for cpp
 #ifdef __cplusplus

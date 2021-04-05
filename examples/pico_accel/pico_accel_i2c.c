@@ -25,7 +25,7 @@ int main()
     float rot_x, rot_y, rot_z, temp;
     uint8_t id;
 
-    id = mpu6050_get_id();
+    id = mpu6050_get_device_id();
     while (1)
     {
         mpu6050_get_acceleration(&accel_x, &accel_y, &accel_z);
