@@ -1,7 +1,7 @@
 add_library(mpu6050 INTERFACE)
 
 target_sources(mpu6050 INTERFACE
-  ${CMAKE_CURRENT_LIST_DIR}/mpu6050_i2c.c
+  ${CMAKE_CURRENT_LIST_DIR}/mpu6050.c
 )
 
 target_include_directories(mpu6050 INTERFACE ${CMAKE_CURRENT_LIST_DIR})

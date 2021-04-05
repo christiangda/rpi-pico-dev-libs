@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "pico/stdlib.h"
-#include "mpu6050_i2c.h"
+#include "mpu6050.h"
 
 #define MPU6050_ADDRESS 0x68
 #define MPU6050_BAUD_RATE 400000

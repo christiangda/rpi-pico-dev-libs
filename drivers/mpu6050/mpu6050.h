@@ -29,8 +29,8 @@
  * */
 
 
-#ifndef _MPU6050_I2C_H
-#define _MPU6050_I2C_H
+#ifndef _MPU6050_H
+#define _MPU6050_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -126,4 +126,4 @@ void mpu6050_reset_temperature_path();
  }
 #endif
 
-#endif /* _MPU6050_I2C_H */
+#endif /* _MPU6050_H */
