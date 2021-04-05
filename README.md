@@ -4,6 +4,12 @@ Raspberry Pi Pico Devices Library
 
 ## Dev
 
+configure `Visual Studio Code`
+
+```sh
+code --install-extension ms-vscode.cpptools-extension-pack
+```
+
 ```sh
 brew install libtool 
 brew install automake 

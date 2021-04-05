@@ -1,78 +1,255 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2021 Christian González Di Antonio
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ */
 #include <stdio.h>
 
 #include "mpu6050_i2c.h"
 #include "hardware/i2c.h"
 #include "pico/stdlib.h"
 
-
 #define W_DATA       0xD0
 #define R_DATA       0xD1
 #define WAIT_TIME_MS 100
 
+// Register reset values
+typedef enum
+{
+    RESET_VALUE               = 0x00,
+    PWR_MGMT_1_RESET_VALUE    = 0x80, // docs 0x40??
+    WHO_AM_I_RESET_VALUE      = 0x68,
 
-#define RESET_VALUE             0x00
-#define PWR_MGMT_1_RESET_VALUE  0x80 // 0x40 in the manual?
-#define WHO_AM_I_RESET_VALUE    0x68
+    // Register 104 – Signal Path Reset SIGNAL_PATH_RESET
+    GYRO_RESET_VALUE          = 0x04,
+    ACCEL_RESET_VALUE         = 0x02,
+    TEMP_RESET_VALUE          = 0x01,
+} reg_reset_values;
+
+// Register Map
+typedef enum
+{
+    SELF_TEST_X       = 0x0D, // R/W
+    SELF_TEST_Y       = 0x0E, // R/W
+    SELF_TEST_Z       = 0x0F, // R/W
+    SELF_TEST_A       = 0x10, // R/W
+
+    SMPLRT_DIV        = 0x19, // R/W
+
+    CONFIG            = 0x1A, // R/W
+    GYRO_CONFIG       = 0x1B, // R/W
+    ACCEL_CONFIG      = 0x1C, // R/W
+
+    FIFO_EN           = 0x23, // R/W
+
+    I2C_MST_CTRL      = 0x24, // R/W
+    I2C_SLV0_ADDR     = 0x25, // R/W
+    I2C_SLV0_REG      = 0x26, // R/W
+    I2C_SLV0_CTRL     = 0x27, // R/W
+    I2C_SLV1_ADDR     = 0x28, // R/W
+    I2C_SLV1_REG      = 0x29, // R/W
+    I2C_SLV1_CTRL     = 0x2A, // R/W
+    I2C_SLV2_ADDR     = 0x2B, // R/W
+    I2C_SLV2_REG      = 0x2C, // R/W
+    I2C_SLV2_CTRL     = 0x2D, // R/W
+    I2C_SLV3_ADDR     = 0x2E, // R/W
+    I2C_SLV3_REG      = 0x2F, // R/W
+    I2C_SLV3_CTRL     = 0x30, // R/W
+    I2C_SLV4_ADDR     = 0x31, // R/W
+    I2C_SLV4_REG      = 0x32, // R/W
+    I2C_SLV4_DO       = 0x33, // R/W
+    I2C_SLV4_CTRL     = 0x34, // R/W
+    I2C_SLV4_DI       = 0x35, // R
+    I2C_MST_STATUS    = 0x36, // R
+
+    INT_PIN_CFG       = 0x37, // R/W
+    INT_ENABLE        = 0x38, // R/W
+    INT_STATUS        = 0x3A, // R
+
+    ACCEL_XOUT_H      = 0x3B, // R
+    ACCEL_XOUT_L      = 0x3C, // R
+    ACCEL_YOUT_H      = 0x3D, // R
+    ACCEL_YOUT_L      = 0x3E, // R
+    ACCEL_ZOUT_H      = 0x3F, // R
+    ACCEL_ZOUT_L      = 0x40, // R
+
+    TEMP_OUT_H        = 0x41, // R
+    TEMP_OUT_L        = 0x42, // R
+
+    GYRO_XOUT_H       = 0x43, // R
+    GYRO_XOUT_L       = 0x44, // R
+    GYRO_YOUT_H       = 0x45, // R
+    GYRO_YOUT_L       = 0x46, // R
+    GYRO_ZOUT_H       = 0x47, // R
+    GYRO_ZOUT_L       = 0x48, // R
+
+    EXT_SENS_DATA_00  = 0x49, // R
+    EXT_SENS_DATA_01  = 0x4A, // R
+    EXT_SENS_DATA_02  = 0x4B, // R
+    EXT_SENS_DATA_03  = 0x4C, // R
+    EXT_SENS_DATA_04  = 0x4D, // R
+    EXT_SENS_DATA_05  = 0x4E, // R
+    EXT_SENS_DATA_06  = 0x4F, // R
+    EXT_SENS_DATA_07  = 0x50, // R
+    EXT_SENS_DATA_08  = 0x51, // R
+    EXT_SENS_DATA_09  = 0x52, // R
+    EXT_SENS_DATA_10  = 0x53, // R
+    EXT_SENS_DATA_11  = 0x54, // R
+    EXT_SENS_DATA_12  = 0x55, // R
+    EXT_SENS_DATA_13  = 0x56, // R
+    EXT_SENS_DATA_14  = 0x57, // R
+    EXT_SENS_DATA_15  = 0x58, // R
+    EXT_SENS_DATA_16  = 0x59, // R
+    EXT_SENS_DATA_17  = 0x5A, // R
+    EXT_SENS_DATA_18  = 0x5B, // R
+    EXT_SENS_DATA_19  = 0x5C, // R
+    EXT_SENS_DATA_20  = 0x5D, // R
+    EXT_SENS_DATA_21  = 0x5E, // R
+    EXT_SENS_DATA_22  = 0x5F, // R
+    EXT_SENS_DATA_23  = 0x60, // R
+
+    I2C_SLV0_DO       = 0x63, // R/W
+    I2C_SLV1_DO       = 0x64, // R/W
+    I2C_SLV2_DO       = 0x65, // R/W
+    I2C_SLV3_DO       = 0x66, // R/W
+
+    I2C_MST_DELAY_CTRL= 0x67, // R/W
+
+    SIGNAL_PATH_RESET = 0x68, // W
+
+    USER_CTRL         = 0x6A, // R/W
+
+    PWR_MGMT_1        = 0x6B, // R/W
+    PWR_MGMT_2        = 0x6C, // R/W
+
+    FIFO_COUNTH       = 0x72, // R/W
+    FIFO_COUNTL       = 0x73, // R/W
+    FIFO_R_W          = 0x74, // R/W
+
+    WHO_AM_I          = 0x75, // R
+} reg_map;
 
 
-#define SMPLRT_DIV     0x19
+/**
+ * @brief Write a single bit from an 8-bit device register.
+ * @param reg Register reg to write to
+ * @param value Container for single byte value
+ */
+static void i2c_write(uint8_t reg, uint8_t value){
+    uint8_t buf[2] = {reg, value};
+    i2c_write_blocking(MPU6050_I2C_PORT, MPU6050_ADDRESS, buf, 2, false);
+}
 
-#define CONFIG         0x1A
-#define GYRO_CONFIG    0x1B
-#define ACCEL_CONFIG   0x1C
+/**
+ * @brief Read a single bit from an 8-bit device register.
+ * @param reg Register reg to read from
+ * @param value Container for single byte value
+ * @return Status of read operation (true = success)
+ */
+static int16_t i2c_read(uint8_t reg, int16_t *value){
+    int ret;
+    i2c_write_blocking(MPU6050_I2C_PORT, MPU6050_ADDRESS, &reg, 1, true);
+    ret = i2c_read_blocking(MPU6050_I2C_PORT, MPU6050_ADDRESS, (uint8_t *)value, 1, false);
 
-#define ACCEL_XOUT_H   0x3B
-#define ACCEL_XOUT_L   0x3C
-#define ACCEL_YOUT_H   0x3D
-#define ACCEL_YOUT_L   0x3E
-#define ACCEL_ZOUT_H   0x3F
-#define ACCEL_ZOUT_L   0x40
+    return ret >0; true; false;
+}
 
-#define TEMP_OUT_H     0x41
-#define TEMP_OUT_L     0x42
+/**
+ * @brief Register 104 – Signal Path Reset
+ *  Used to reset the analog and digital signal paths of the gyroscope, accelerometer, and temperature sensors.
+ *  The reset will revert the signal path analog to digital converters and filters to their power up configurations.
+ *
+ * @param data
+ */
+static void signal_path_write(uint8_t data){
+    i2c_write(SIGNAL_PATH_RESET, data);
+}
 
-#define GYRO_XOUT_H    0x43
-#define GYRO_XOUT_L    0x44
-#define GYRO_YOUT_H    0x45
-#define GYRO_YOUT_L    0x46
-#define GYRO_ZOUT_H    0x47
-#define GYRO_ZOUT_L    0x48
+void mpu6050_init(){
+    i2c_init(MPU6050_I2C_PORT, MPU6050_BAUD_RATE);
 
-#define SIGNAL_PATH_RESET 0x68
-#define USER_CTRL         0x6A
+    gpio_set_function(MPU6050_SDA_PIN, GPIO_FUNC_I2C);
+    gpio_pull_up(MPU6050_SDA_PIN);
 
-#define PWR_MGMT_1     0x6B
-#define PWR_MGMT_2     0x6C
-#define WHO_AM_I       0x75
+    gpio_set_function(MPU6050_SCL_PIN, GPIO_FUNC_I2C);
+    gpio_pull_up(MPU6050_SCL_PIN);
 
+#if defined(MPU6050_ENABLE_PICOTOOL)
+    bi_decl(bi_2pins_with_func(MPU6050_SDA_PIN, MPU6050_SCL_PIN, GPIO_FUNC_I2C));
+#endif
+
+    // Full reset
+    mpu6050_reset();
+
+}
 
 void mpu6050_test_conn(){
 
 }
 
-void mpu6050_reset_signals(){
-    uint8_t buf[] = {SIGNAL_PATH_RESET, 0x7};
-    i2c_write_blocking(MPU6050_I2C_PORT,MPU6050_ADDRESS,&buf,2,false);
+
+/**
+ * @brief Resets the accelerometer analog and digital signal paths.
+ *
+ */
+void mpu6050_reset_accelerometer_path(){
+    signal_path_write(ACCEL_RESET_VALUE);
+}
+
+/**
+ * @brief Resets the gyroscope analog and digital signal paths.
+ *
+ */
+void mpu6050_reset_gyroscope_path(){
+    signal_path_write(GYRO_RESET_VALUE);
+}
+
+/**
+ * @brief Resets the temperature sensor analog and digital signal paths.
+ *
+ */
+void mpu6050_reset_temperature_path(){
+    signal_path_write(TEMP_RESET_VALUE);
+}
+
+// getters
+uint8_t mpu6050_get_id(){
+
+}
+
+// setters
+void mpu6050_set_clock(uint8_t source){
+    i2c_write(PWR_MGMT_1, MPU6050_CLOCK);
 }
 
 void mpu6050_reset(){
 
-    uint8_t buf[] = {PWR_MGMT_1, PWR_MGMT_1_RESET_VALUE};
-    uint8_t status[1];
-
-    i2c_write_blocking(MPU6050_I2C_PORT,MPU6050_ADDRESS,&buf,2,false);
+    // DEVICE_RESET (register 107)
+    i2c_write(PWR_MGMT_1, PWR_MGMT_1_RESET_VALUE);
     sleep_ms(WAIT_TIME_MS);
-    i2c_read_blocking(i2c_default, accel_addr, status, 1, false);
 
-    if (status[0] != 0x00)
-    {
-        while (1)
-        {
-            printf("Resetting device");
-            sleep_ms(WAIT_TIME_MS);
-        }
-    }
-    // resetting giro, accel and temp sensor
-    mpu6050_reset_signals()
+    //SIGNAL_PATH_RESET (register 104)
+    // data = 00000111 (100 + 010 + 001) = 0x07 = 7
+    signal_path_write(GYRO_RESET_VALUE + ACCEL_RESET_VALUE + TEMP_RESET_VALUE);
     sleep_ms(WAIT_TIME_MS);
 }
+

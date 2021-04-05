@@ -14,9 +14,6 @@ if (TARGET tinyusb_device)
   # create map/bin/hex file etc.
   pico_add_extra_outputs(pico_accel_i2c)
 
-  # add url via pico_set_program_url
-  example_auto_set_url(pico_accel_i2c)
-
 elseif(PICO_ON_DEVICE)
     message(WARNING "not building pico_accel_i2c because TinyUSB submodule is not initialized in the SDK")
 endif()

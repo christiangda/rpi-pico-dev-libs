@@ -3,5 +3,11 @@
     {
       "path": "."
     }
-  ]
+],
+"settings": {
+    "files.associations": {
+        "*.template": "yaml",
+        "memory": "c"
+    }
+}
 }

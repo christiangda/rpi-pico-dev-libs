@@ -12,7 +12,6 @@ set(RPI_PICO_DEV_LIBS_PATH ${PROJECT_SOURCE_DIR})
 
 # Initialize the SDK
 pico_sdk_init()
-include(example_auto_set_url.cmake)
 
 add_subdirectory(drivers)
 add_subdirectory(libraries)
