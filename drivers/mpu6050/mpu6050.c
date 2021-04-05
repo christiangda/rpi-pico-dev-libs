@@ -155,7 +155,7 @@ typedef enum
 
 
 /**
- * @brief Write a single bit from an 8-bit device register.
+ * @brief Write a single byte from an 8-bit device register.
  * @param reg Register reg to write to
  * @param value Container for single byte value
  */
@@ -165,7 +165,7 @@ static void i2c_write_reg(uint8_t reg, uint8_t value){
 }
 
 /**
- * @brief Read a single bit from an 8-bit device register.
+ * @brief Read a single byte from an 8-bit device register.
  * @param reg Register reg to read from
  * @param value Container for single byte value
  * @return Status of read operation (true = success)
@@ -178,6 +178,14 @@ static uint8_t i2c_read_reg(uint8_t reg, uint8_t *value){
     return ret >0; true; false;
 }
 
+/**
+ * @brief Read multiples bytes from device starting from a register.
+ *
+ * @param reg Register reg to start read from
+ * @param values Container for multiples byte value
+ * @param len Size onf the Container values
+ * @return uint8_t Status of read operation (true = success)
+ */
 static uint8_t i2c_read_regs(uint8_t reg, uint8_t *values, size_t len){
     int ret;
     i2c_write_blocking(MPU6050_I2C_PORT, MPU6050_ADDRESS, &reg, 1, true);
