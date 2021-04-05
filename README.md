@@ -29,3 +29,11 @@ brew install minicom
 brew install clang-format
 brew install openocd
 ```
+
+build 
+```sh
+mkdir build
+cd build/
+cmake ..
+make
+```

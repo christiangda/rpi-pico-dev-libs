@@ -28,6 +28,11 @@
 #include "hardware/i2c.h"
 #include "pico/stdlib.h"
 
+#if defined(MPU6050_ENABLE_PICOTOOL)
+#include "pico/binary_info.h"
+#endif
+
+
 #define W_DATA       0xD0
 #define R_DATA       0xD1
 #define WAIT_TIME_MS 100
@@ -154,7 +159,7 @@ typedef enum
  * @param reg Register reg to write to
  * @param value Container for single byte value
  */
-static void i2c_write(uint8_t reg, uint8_t value){
+static void i2c_write_reg(uint8_t reg, uint8_t value){
     uint8_t buf[2] = {reg, value};
     i2c_write_blocking(MPU6050_I2C_PORT, MPU6050_ADDRESS, buf, 2, false);
 }
@@ -165,7 +170,7 @@ static void i2c_write(uint8_t reg, uint8_t value){
  * @param value Container for single byte value
  * @return Status of read operation (true = success)
  */
-static int16_t i2c_read(uint8_t reg, int16_t *value){
+static int16_t i2c_read_reg(uint8_t reg, int16_t *value){
     int ret;
     i2c_write_blocking(MPU6050_I2C_PORT, MPU6050_ADDRESS, &reg, 1, true);
     ret = i2c_read_blocking(MPU6050_I2C_PORT, MPU6050_ADDRESS, (uint8_t *)value, 1, false);
@@ -181,7 +186,7 @@ static int16_t i2c_read(uint8_t reg, int16_t *value){
  * @param data
  */
 static void signal_path_write(uint8_t data){
-    i2c_write(SIGNAL_PATH_RESET, data);
+    i2c_write_reg(SIGNAL_PATH_RESET, data);
 }
 
 void mpu6050_init(){
@@ -200,12 +205,17 @@ void mpu6050_init(){
     // Full reset
     mpu6050_reset();
 
+    // check id
+    uint8_t id;
+    id = mpu6050_get_id;
+    if(id != MPU6050_ADDRESS ){
+        while (1)
+        {
+            printf("MPU-6050 id is not correct, please check the connection!");
+            sleep_ms(WAIT_TIME_MS *10 );
+        }
+    }
 }
-
-void mpu6050_test_conn(){
-
-}
-
 
 /**
  * @brief Resets the accelerometer analog and digital signal paths.
@@ -233,18 +243,20 @@ void mpu6050_reset_temperature_path(){
 
 // getters
 uint8_t mpu6050_get_id(){
-
+    uint8_t value;
+    i2c_read_reg(WHO_AM_I, &value);
+    return value;
 }
 
 // setters
 void mpu6050_set_clock(uint8_t source){
-    i2c_write(PWR_MGMT_1, MPU6050_CLOCK);
+    i2c_write_reg(PWR_MGMT_1, MPU6050_CLOCK);
 }
 
 void mpu6050_reset(){
 
     // DEVICE_RESET (register 107)
-    i2c_write(PWR_MGMT_1, PWR_MGMT_1_RESET_VALUE);
+    i2c_write_reg(PWR_MGMT_1, PWR_MGMT_1_RESET_VALUE);
     sleep_ms(WAIT_TIME_MS);
 
     //SIGNAL_PATH_RESET (register 104)

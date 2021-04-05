@@ -105,9 +105,8 @@ uint8_t mpu6050_get_id();
 
 // setters
 void mpu6050_set_clock(uint8_t);
-void mpu6050_test_conn();
 
-
+// Support for cpp
 #ifdef __cplusplus
  }
 #endif
