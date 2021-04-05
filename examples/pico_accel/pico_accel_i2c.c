@@ -26,12 +26,12 @@ int main()
     uint8_t id;
 
     id = mpu6050_get_id();
-
     while (1)
     {
         mpu6050_get_acceleration(&accel_x, &accel_y, &accel_z);
         mpu6050_get_acceleration(&rot_x, &rot_y, &rot_z);
         temp = mpu6050_get_temperature();
+
         printf("Device ID: %d, Accel: X = %6.2f, Y = %6.2f, Z = %6.2f, Rot: X = %6.2f, Y = %6.2f, Z = %6.2f,  Temp: %6.2f\n", id, accel_x, accel_y, accel_z, rot_x, rot_y, rot_z, temp);
 
         sleep_ms(500);

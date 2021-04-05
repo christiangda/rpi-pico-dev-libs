@@ -41,7 +41,7 @@
 typedef enum
 {
     RESET_VALUE               = 0x00,
-    PWR_MGMT_1_RESET_VALUE    = 0x40, // docs 0x40??
+    PWR_MGMT_1_RESET_VALUE    = 0x00, // docs 0x40??
     WHO_AM_I_RESET_VALUE      = 0x68,
 
     // Register 104 – Signal Path Reset SIGNAL_PATH_RESET
@@ -416,19 +416,22 @@ float mpu6050_get_rotation_z(){
 }
 
 /**
- * @brief
- *
+ * @brief The most recent temperature sensor measurement.
+ * Temperature in degrees C = (TEMP_OUT Register Value as a signed quantity)/340 + 36.53
  * @return float
  */
 float mpu6050_get_temperature(){
     uint8_t data[2];
+    uint8_t temp;
 
     // reading the 2 bytes (registers) at the same time
     // TEMP_OUT[15:8] --> data[0]
     // TEMP_OUT[7:0]  --> data[1]
     i2c_read_regs(TEMP_OUT_H, data, 2);
 
-    return (float)((((int16_t)data[0]) << 8) | data[1])/100.0;
+    temp = (((int16_t)data[0]) << 8) | data[1];
+
+    return (temp/340.0) + 36.53;
 }
 
 // setters
