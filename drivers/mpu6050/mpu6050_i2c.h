@@ -103,9 +103,9 @@ void mpu6050_reset_temperature_path();
 // getters
 uint8_t mpu6050_get_id();
 void mpu6050_get_acceleration(float*, float*, float*);
-int16_t mpu6050_get_acceleration_x();
-int16_t mpu6050_get_acceleration_y();
-int16_t mpu6050_get_acceleration_z();
+float mpu6050_get_acceleration_x();
+float mpu6050_get_acceleration_y();
+float mpu6050_get_acceleration_z();
 
 // setters
 void mpu6050_set_clock(uint8_t);

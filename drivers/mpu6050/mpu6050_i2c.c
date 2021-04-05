@@ -295,7 +295,7 @@ void mpu6050_get_acceleration(float *x, float *y, float *z){
  *
  * @return int16_t
  */
-int16_t mpu6050_get_acceleration_x(){
+float mpu6050_get_acceleration_x(){
     uint8_t data[2];
 
     // reading the 2 bytes (registers) at the same time
@@ -311,7 +311,7 @@ int16_t mpu6050_get_acceleration_x(){
  *
  * @return int16_t
  */
-int16_t mpu6050_get_acceleration_y(){
+float mpu6050_get_acceleration_y(){
     uint8_t data[2];
 
     // reading the 2 bytes (registers) at the same time
@@ -327,7 +327,7 @@ int16_t mpu6050_get_acceleration_y(){
  *
  * @return int16_t
  */
-int16_t mpu6050_get_acceleration_z(){
+float mpu6050_get_acceleration_z(){
     uint8_t data[2];
 
     // reading the 2 bytes (registers) at the same time
