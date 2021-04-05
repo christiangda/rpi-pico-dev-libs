@@ -28,7 +28,7 @@
 #include "hardware/i2c.h"
 #include "pico/stdlib.h"
 
-#if defined(MPU6050_ENABLE_PICOTOOL)
+#if defined(MPU6050_ENABLE_PICOTOOL) && MPU6050_ENABLE_PICOTOOL == 1
 #include "pico/binary_info.h"
 #endif
 
@@ -170,10 +170,18 @@ static void i2c_write_reg(uint8_t reg, uint8_t value){
  * @param value Container for single byte value
  * @return Status of read operation (true = success)
  */
-static int16_t i2c_read_reg(uint8_t reg, int16_t *value){
+static uint8_t i2c_read_reg(uint8_t reg, uint8_t *value){
     int ret;
     i2c_write_blocking(MPU6050_I2C_PORT, MPU6050_ADDRESS, &reg, 1, true);
-    ret = i2c_read_blocking(MPU6050_I2C_PORT, MPU6050_ADDRESS, (uint8_t *)value, 1, false);
+    ret = i2c_read_blocking(MPU6050_I2C_PORT, MPU6050_ADDRESS, value, 1, false);
+
+    return ret >0; true; false;
+}
+
+static uint8_t i2c_read_regs(uint8_t reg, uint8_t *values, size_t len){
+    int ret;
+    i2c_write_blocking(MPU6050_I2C_PORT, MPU6050_ADDRESS, &reg, 1, true);
+    ret = i2c_read_blocking(MPU6050_I2C_PORT, MPU6050_ADDRESS, values, len, false);
 
     return ret >0; true; false;
 }
@@ -198,7 +206,7 @@ void mpu6050_init(){
     gpio_set_function(MPU6050_SCL_PIN, GPIO_FUNC_I2C);
     gpio_pull_up(MPU6050_SCL_PIN);
 
-#if defined(MPU6050_ENABLE_PICOTOOL)
+#if defined(MPU6050_ENABLE_PICOTOOL) && MPU6050_ENABLE_PICOTOOL == 1
     bi_decl(bi_2pins_with_func(MPU6050_SDA_PIN, MPU6050_SCL_PIN, GPIO_FUNC_I2C));
 #endif
 
@@ -207,7 +215,7 @@ void mpu6050_init(){
 
     // check id
     uint8_t id;
-    id = mpu6050_get_id;
+    id = mpu6050_get_id();
     if(id != MPU6050_ADDRESS ){
         while (1)
         {
@@ -242,11 +250,94 @@ void mpu6050_reset_temperature_path(){
 }
 
 // getters
+/**
+ * @brief
+ *
+ * @return uint8_t
+ */
 uint8_t mpu6050_get_id(){
     uint8_t value;
     i2c_read_reg(WHO_AM_I, &value);
     return value;
 }
+
+/**
+ * @brief
+ *
+ * @param x
+ * @param y
+ * @param z
+ */
+void mpu6050_get_acceleration(float *x, float *y, float *z){
+    uint8_t data[6];
+    int16_t accel_x, accel_y, accel_z;
+
+    // reading the 6 bytes (registers) at the same time
+    // ACCEL_XOUT[15:8] --> data[0]
+    // ACCEL_XOUT[7:0]  --> data[1]
+    // ACCEL_YOUT[15:8] --> data[2]
+    // ACCEL_YOUT[7:0]  --> data[3]
+    // ACCEL_ZOUT[15:8] --> data[4]
+    // ACCEL_ZOUT[7:0]  --> data[5]
+    i2c_read_regs(ACCEL_XOUT_H, data, 6);
+
+    accel_x = (((int16_t)data[0]) << 8) | data[1];
+    accel_y = (((int16_t)data[2]) << 8) | data[3];
+    accel_z = (((int16_t)data[4]) << 8) | data[5];
+
+    *x = accel_x / 100.0;
+    *y = accel_y / 100.0;
+    *z = accel_z / 100.0;
+}
+
+/**
+ * @brief
+ *
+ * @return int16_t
+ */
+int16_t mpu6050_get_acceleration_x(){
+    uint8_t data[2];
+
+    // reading the 2 bytes (registers) at the same time
+    // ACCEL_XOUT[15:8]
+    // ACCEL_XOUT[7:0]
+    i2c_read_regs(ACCEL_XOUT_H, data, 2);
+
+    return (((int16_t)data[0]) << 8) | data[1];
+}
+
+/**
+ * @brief
+ *
+ * @return int16_t
+ */
+int16_t mpu6050_get_acceleration_y(){
+    uint8_t data[2];
+
+    // reading the 2 bytes (registers) at the same time
+    // ACCEL_YOUT[15:8]
+    // ACCEL_YOUT[7:0]
+    i2c_read_regs(ACCEL_YOUT_H, data, 2);
+
+    return (((int16_t)data[0]) << 8) | data[1];
+}
+
+/**
+ * @brief
+ *
+ * @return int16_t
+ */
+int16_t mpu6050_get_acceleration_z(){
+    uint8_t data[2];
+
+    // reading the 2 bytes (registers) at the same time
+    // ACCEL_ZOUT[15:8]
+    // ACCEL_ZOUT[7:0]
+    i2c_read_regs(ACCEL_ZOUT_H, data, 2);
+
+    return (((int16_t)data[0]) << 8) | data[1];
+}
+
 
 // setters
 void mpu6050_set_clock(uint8_t source){
