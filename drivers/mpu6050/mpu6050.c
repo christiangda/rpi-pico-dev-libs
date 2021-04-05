@@ -259,9 +259,13 @@ void mpu6050_reset_temperature_path(){
 
 // getters
 /**
- * @brief
+ * @brief Return the identity of the device.
+ * Use the contents of WHO_AM_I, this are the upper 6 bits of the MPU-60X0’s 7-bit I2C address.
+ * The least significant bit of the MPU-60X0’s I2C address is determined by the value of the AD0 pin.
+ * The value of the AD0 pin is not reflected in this register.
+ * The default value of the register is 0x68 == 104.
  *
- * @return uint8_t
+ * @return uint8_t the device id
  */
 uint8_t mpu6050_get_device_id(){
     uint8_t value;
