@@ -1,0 +1,35 @@
+{
+    "cmake.environment": {
+        "PICO_SDK_PATH": "${env:PICO_SDK_PATH}"
+    },
+    "cmake.buildBeforeRun": true,
+    "editor.insertSpaces": true,
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "editor.tabSize": 4,
+    "editor.detectIndentation": false,
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/build/*/**": true,
+        "**/.build/*/**": true,
+        "**/vendor/*/**": true
+    },
+    "files.exclude": {
+        "**/build": true,
+        "**/.build": true,
+        "**/*.hex": true,
+        "**/*.bin": true
+    },
+    "search.exclude": {
+        "**/.git": true,
+        "**/build": true,
+        "**/.build": true,
+        "**/*.hex": true,
+        "**/*.bin": true
+    },
+    "[markdown]": {
+        "editor.trimAutoWhitespace": false,
+        "files.trimTrailingWhitespace": false
+    }
+}
