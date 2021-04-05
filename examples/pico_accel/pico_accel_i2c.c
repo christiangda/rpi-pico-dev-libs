@@ -22,18 +22,17 @@ int main()
     mpu6050_init();
 
     float accel_x, accel_y, accel_z;
+    float rot_x, rot_y, rot_z, temp;
     uint8_t id;
 
     id = mpu6050_get_id();
 
     while (1)
     {
-        // mpu6050_get_acceleration(&accel_x, &accel_y, &accel_z);
-        accel_x = mpu6050_get_acceleration_x();
-        accel_y = mpu6050_get_acceleration_y();
-        accel_z = mpu6050_get_acceleration_z();
-
-        printf("Device ID: %d, Accelerations: X = %6.2f, Y = %6.2f, Z = %6.2f\n", id, accel_x, accel_y, accel_z);
+        mpu6050_get_acceleration(&accel_x, &accel_y, &accel_z);
+        mpu6050_get_acceleration(&rot_x, &rot_y, &rot_z);
+        temp = mpu6050_get_temperature();
+        printf("Device ID: %d, Accel: X = %6.2f, Y = %6.2f, Z = %6.2f, Rot: X = %6.2f, Y = %6.2f, Z = %6.2f,  Temp: %6.2f\n", id, accel_x, accel_y, accel_z, rot_x, rot_y, rot_z, temp);
 
         sleep_ms(500);
     }

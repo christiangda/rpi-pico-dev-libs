@@ -102,10 +102,21 @@ void mpu6050_reset_temperature_path();
 
 // getters
 uint8_t mpu6050_get_id();
+
+// acceleration
 void mpu6050_get_acceleration(float*, float*, float*);
 float mpu6050_get_acceleration_x();
 float mpu6050_get_acceleration_y();
 float mpu6050_get_acceleration_z();
+
+// gyroscope
+void mpu6050_get_rotation(float*, float*, float*);
+float mpu6050_get_rotation_x();
+float mpu6050_get_rotation_y();
+float mpu6050_get_rotation_z();
+
+// temperature
+float mpu6050_get_temperature();
 
 // setters
 void mpu6050_set_clock(uint8_t);

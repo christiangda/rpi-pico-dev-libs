@@ -41,7 +41,7 @@
 typedef enum
 {
     RESET_VALUE               = 0x00,
-    PWR_MGMT_1_RESET_VALUE    = 0x80, // docs 0x40??
+    PWR_MGMT_1_RESET_VALUE    = 0x40, // docs 0x40??
     WHO_AM_I_RESET_VALUE      = 0x68,
 
     // Register 104 – Signal Path Reset SIGNAL_PATH_RESET
@@ -285,9 +285,9 @@ void mpu6050_get_acceleration(float *x, float *y, float *z){
     accel_y = (((int16_t)data[2]) << 8) | data[3];
     accel_z = (((int16_t)data[4]) << 8) | data[5];
 
-    *x = accel_x / 100.0;
-    *y = accel_y / 100.0;
-    *z = accel_z / 100.0;
+    *x = (float)accel_x / 100.0;
+    *y = (float)accel_y / 100.0;
+    *z = (float)accel_z / 100.0;
 }
 
 /**
@@ -299,11 +299,11 @@ float mpu6050_get_acceleration_x(){
     uint8_t data[2];
 
     // reading the 2 bytes (registers) at the same time
-    // ACCEL_XOUT[15:8]
-    // ACCEL_XOUT[7:0]
+    // ACCEL_XOUT[15:8] --> data[0]
+    // ACCEL_XOUT[7:0]  --> data[1]
     i2c_read_regs(ACCEL_XOUT_H, data, 2);
 
-    return (((int16_t)data[0]) << 8) | data[1];
+    return (float)((((int16_t)data[0]) << 8) | data[1])/100.0;
 }
 
 /**
@@ -315,11 +315,11 @@ float mpu6050_get_acceleration_y(){
     uint8_t data[2];
 
     // reading the 2 bytes (registers) at the same time
-    // ACCEL_YOUT[15:8]
-    // ACCEL_YOUT[7:0]
+    // ACCEL_YOUT[15:8] --> data[0]
+    // ACCEL_YOUT[7:0]  --> data[1]
     i2c_read_regs(ACCEL_YOUT_H, data, 2);
 
-    return (((int16_t)data[0]) << 8) | data[1];
+    return (float)((((int16_t)data[0]) << 8) | data[1])/100.0;
 }
 
 /**
@@ -331,13 +331,105 @@ float mpu6050_get_acceleration_z(){
     uint8_t data[2];
 
     // reading the 2 bytes (registers) at the same time
-    // ACCEL_ZOUT[15:8]
-    // ACCEL_ZOUT[7:0]
+    // ACCEL_ZOUT[15:8] --> data[0]
+    // ACCEL_ZOUT[7:0]  --> data[1]
     i2c_read_regs(ACCEL_ZOUT_H, data, 2);
 
-    return (((int16_t)data[0]) << 8) | data[1];
+    return (float)((((int16_t)data[0]) << 8) | data[1])/100.0;
 }
 
+/**
+ * @brief
+ *
+ * @param x
+ * @param y
+ * @param z
+ */
+void mpu6050_get_rotation(float *x, float *y, float *z){
+    uint8_t data[6];
+    int16_t accel_x, accel_y, accel_z;
+
+    // reading the 6 bytes (registers) at the same time
+    // GYRO_XOUT[15:8] --> data[0]
+    // GYRO_XOUT[7:0]  --> data[1]
+    // GYRO_YOUT[15:8] --> data[2]
+    // GYRO_YOUT[7:0]  --> data[3]
+    // GYRO_ZOUT[15:8] --> data[4]
+    // GYRO_ZOUT[7:0]  --> data[5]
+    i2c_read_regs(GYRO_XOUT_H, data, 6);
+
+    accel_x = (((int16_t)data[0]) << 8) | data[1];
+    accel_y = (((int16_t)data[2]) << 8) | data[3];
+    accel_z = (((int16_t)data[4]) << 8) | data[5];
+
+    *x = (float)accel_x / 100.0;
+    *y = (float)accel_y / 100.0;
+    *z = (float)accel_z / 100.0;
+}
+
+/**
+ * @brief
+ *
+ * @return int16_t
+ */
+float mpu6050_get_rotation_x(){
+    uint8_t data[2];
+
+    // reading the 2 bytes (registers) at the same time
+    // GYRO_XOUT[15:8] --> data[0]
+    // GYRO_XOUT[7:0]  --> data[1]
+    i2c_read_regs(GYRO_XOUT_H, data, 2);
+
+    return (float)((((int16_t)data[0]) << 8) | data[1])/100.0;
+}
+
+/**
+ * @brief
+ *
+ * @return int16_t
+ */
+float mpu6050_get_rotation_y(){
+    uint8_t data[2];
+
+    // reading the 2 bytes (registers) at the same time
+    // GYRO_YOUT[15:8] --> data[0]
+    // GYRO_YOUT[7:0]  --> data[1]
+    i2c_read_regs(GYRO_YOUT_H, data, 2);
+
+    return (float)((((int16_t)data[0]) << 8) | data[1])/100.0;
+}
+
+/**
+ * @brief
+ *
+ * @return int16_t
+ */
+float mpu6050_get_rotation_z(){
+    uint8_t data[2];
+
+    // reading the 2 bytes (registers) at the same time
+    // GYRO_ZOUT[15:8] --> data[0]
+    // GYRO_ZOUT[7:0]  --> data[1]
+    i2c_read_regs(GYRO_ZOUT_H, data, 2);
+
+    return (float)((((int16_t)data[0]) << 8) | data[1])/100.0;
+}
+
+/**
+ * @brief
+ *
+ * @return float
+ */
+float mpu6050_get_temperature(){
+    uint8_t data[2];
+
+    // reading the 2 bytes (registers) at the same time
+    // TEMP_OUT[15:8] --> data[0]
+    // TEMP_OUT[7:0]  --> data[1]
+    i2c_read_regs(TEMP_OUT_H, data, 2);
+
+    return (float)((((int16_t)data[0]) << 8) | data[1])/100.0;
+}
 
 // setters
 void mpu6050_set_clock(uint8_t source){
