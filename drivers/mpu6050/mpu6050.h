@@ -38,32 +38,44 @@
 
 // i2c port to use for the i2c mpu6050 communication
 #if !defined(MPU6050_I2C_PORT)
-#    define MPU6050_I2C_PORT i2c_default
+#    define MPU6050_I2C_PORT_VALUE i2c_default
+#else
+#    define MPU6050_I2C_PORT_VALUE MPU6050_I2C_PORT
 #endif
 
 // Address to use for the i2c mpu6050 communication
 #if !defined(MPU6050_ADDRESS)
-#    define MPU6050_ADDRESS 0x68
+#    define MPU6050_ADDRESS_VALUE 0x68
+#else
+#    define MPU6050_ADDRESS_VALUE MPU6050_ADDRESS
 #endif
 
 // Frequency to use for the i2c mpu6050 communication
 #if !defined(MPU6050_BAUD_RATE)
-#    define MPU6050_BAUD_RATE 400000
+#    define MPU6050_BAUD_RATE_VALUE 400000
+#else
+#    define MPU6050_BAUD_RATE_VALUE MPU6050_BAUD_RATE
 #endif
 
 // i2c SDA port to use for the i2c mpu6050 communication
 #if !defined(MPU6050_SDA_PIN)
-#    define MPU6050_SDA_PIN PICO_DEFAULT_I2C_SDA_PIN
+#    define MPU6050_SDA_PIN_VALUE PICO_DEFAULT_I2C_SDA_PIN
+#else
+#    define MPU6050_SDA_PIN_VALUE MPU6050_SDA_PIN
 #endif
 
 // i2c SCL port to use for the i2c mpu6050 communication
 #if !defined(MPU6050_SCL_PIN)
-#    define MPU6050_SCL_PIN PICO_DEFAULT_I2C_SCL_PIN
+#    define MPU6050_SCL_PIN_VALUE PICO_DEFAULT_I2C_SCL_PIN
+#else
+#    define MPU6050_SCL_PIN_VALUE MPU6050_SCL_PIN
 #endif
 
 // Expose pins to picotool
 #if !defined(MPU6050_ENABLE_PICOTOOL)
-#    define MPU6050_ENABLE_PICOTOOL 0
+#    define MPU6050_ENABLE_PICOTOOL_VALUE 0
+#else
+#    define MPU6050_ENABLE_PICOTOOL_VALUE MPU6050_ENABLE_PICOTOOL
 #endif
 
 /**

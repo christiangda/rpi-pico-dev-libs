@@ -28,7 +28,7 @@
 #include "hardware/i2c.h"
 #include "pico/stdlib.h"
 
-#if defined(MPU6050_ENABLE_PICOTOOL) && MPU6050_ENABLE_PICOTOOL == 1
+#if defined(MPU6050_ENABLE_PICOTOOL_VALUE) && MPU6050_ENABLE_PICOTOOL_VALUE == 1
 #include "pico/binary_info.h"
 #endif
 
@@ -161,7 +161,7 @@ typedef enum
  */
 static void i2c_write_reg(uint8_t reg, uint8_t value){
     uint8_t buf[2] = {reg, value};
-    i2c_write_blocking(MPU6050_I2C_PORT, MPU6050_ADDRESS, buf, 2, false);
+    i2c_write_blocking(MPU6050_I2C_PORT_VALUE, MPU6050_ADDRESS_VALUE, buf, 2, false);
 }
 
 /**
@@ -172,10 +172,10 @@ static void i2c_write_reg(uint8_t reg, uint8_t value){
  */
 static uint8_t i2c_read_reg(uint8_t reg, uint8_t *value){
     int ret;
-    i2c_write_blocking(MPU6050_I2C_PORT, MPU6050_ADDRESS, &reg, 1, true);
-    ret = i2c_read_blocking(MPU6050_I2C_PORT, MPU6050_ADDRESS, value, 1, false);
+    i2c_write_blocking(MPU6050_I2C_PORT_VALUE, MPU6050_ADDRESS_VALUE, &reg, 1, true);
+    ret = i2c_read_blocking(MPU6050_I2C_PORT_VALUE, MPU6050_ADDRESS_VALUE, value, 1, false);
 
-    return ret >0; true; false;
+    return ret > 0 ? true: false;
 }
 
 /**
@@ -188,10 +188,10 @@ static uint8_t i2c_read_reg(uint8_t reg, uint8_t *value){
  */
 static uint8_t i2c_read_regs(uint8_t reg, uint8_t *values, size_t len){
     int ret;
-    i2c_write_blocking(MPU6050_I2C_PORT, MPU6050_ADDRESS, &reg, 1, true);
-    ret = i2c_read_blocking(MPU6050_I2C_PORT, MPU6050_ADDRESS, values, len, false);
+    i2c_write_blocking(MPU6050_I2C_PORT_VALUE, MPU6050_ADDRESS_VALUE, &reg, 1, true);
+    ret = i2c_read_blocking(MPU6050_I2C_PORT_VALUE, MPU6050_ADDRESS_VALUE, values, len, false);
 
-    return ret >0; true; false;
+    return ret > 0 ? true: false;
 }
 
 /**
@@ -206,16 +206,16 @@ static void signal_path_write(uint8_t data){
 }
 
 void mpu6050_init(){
-    i2c_init(MPU6050_I2C_PORT, MPU6050_BAUD_RATE);
+    i2c_init(MPU6050_I2C_PORT_VALUE, MPU6050_BAUD_RATE_VALUE);
 
-    gpio_set_function(MPU6050_SDA_PIN, GPIO_FUNC_I2C);
-    gpio_pull_up(MPU6050_SDA_PIN);
+    gpio_set_function(MPU6050_SDA_PIN_VALUE, GPIO_FUNC_I2C);
+    gpio_pull_up(MPU6050_SDA_PIN_VALUE);
 
-    gpio_set_function(MPU6050_SCL_PIN, GPIO_FUNC_I2C);
-    gpio_pull_up(MPU6050_SCL_PIN);
+    gpio_set_function(MPU6050_SCL_PIN_VALUE, GPIO_FUNC_I2C);
+    gpio_pull_up(MPU6050_SCL_PIN_VALUE);
 
-#if defined(MPU6050_ENABLE_PICOTOOL) && MPU6050_ENABLE_PICOTOOL == 1
-    bi_decl(bi_2pins_with_func(MPU6050_SDA_PIN, MPU6050_SCL_PIN, GPIO_FUNC_I2C));
+#if defined(MPU6050_ENABLE_PICOTOOL_VALUE) && MPU6050_ENABLE_PICOTOOL_VALUE == 1
+    bi_decl(bi_2pins_with_func(MPU6050_SDA_PIN_VALUE, MPU6050_SCL_PIN_VALUE, GPIO_FUNC_I2C));
 #endif
 
     // Full reset
@@ -224,7 +224,7 @@ void mpu6050_init(){
     // check id
     uint8_t id;
     id = mpu6050_get_device_id();
-    if(id != MPU6050_ADDRESS ){
+    if(id != MPU6050_ADDRESS_VALUE ){
         while (1)
         {
             printf("MPU-6050 id is not correct, please check the connection!");
